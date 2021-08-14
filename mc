@@ -19,7 +19,7 @@ if [ $1 = 'help' ]; then
 		./mc mirror <servername> - copy plugins and configs from one server to the test server.
 		./mc pluginlist - list plugins
 		./mc shutdown - kill all servers now (emergency only)
-		./mc start <servername> - start a server
+		./mc start <servername> [--argument] - start a server with optional startup argument (like --forceUpgrade)
 		./mc stop <servername> - graceful shutdown
 
 		UPDATES
@@ -242,11 +242,11 @@ if [ $1 = 'start' ]; then
 
 				if [ $server = 'bungee' ]; then
 
-					tmux new-window -t minecraft -n "$server" -c "servers/$server" 'java -Xmx'$megs'M -Xms'$megs'M -jar BungeeCord.jar'
+					tmux new-window -t minecraft -n "$server" -c "servers/$server" 'java -Xmx'$megs'M -Xms'$megs'M -jar waterfall.jar'
 
 					else
 
-			        	tmux new-window -t minecraft -n "$server" -c "servers/$server" 'java -Xmx'$megs'M -Xms'$megs'M -XX:+AlwaysPreTouch -XX:+DisableExplicitGC -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=50 -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:InitiatingHeapOccupancyPercent=10 -XX:G1MixedGCLiveThresholdPercent=50 -XX:+AggressiveOpts -jar spigot.jar'
+			        	tmux new-window -t minecraft -n "$server" -c "servers/$server" 'java -Xmx'$megs'M -Xms'$megs'M -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=35 -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Dusing.aikars.flags=mcflags.emc.gs -jar paper.jar $3'
 
 	       		fi
 
@@ -274,7 +274,7 @@ if [ $1 = 'start' ]; then
 		megs=$(awk '/'$2'/ {print $2}' config/serverlist);
 
 		# start tmux window
-		tmux new-window -t minecraft -n $2 -c 'servers/'$2 'java -Xmx'$megs'M -Xms'$megs'M -jar BungeeCord.jar'
+		tmux new-window -t minecraft -n $2 -c 'servers/'$2 'java -Xmx'$megs'M -Xms'$megs'M -jar waterfall.jar'
 		echo $2' started with '$megs' megs.'
 		exit
 	fi
@@ -292,7 +292,8 @@ if [ $1 = 'start' ]; then
 		megs=$(awk '/'$2'/ {print $2}' config/serverlist);
 
 		# start tmux window
-		tmux new-window -t minecraft -n $2 -c 'servers/'$2 'java -Xmx'$megs'M -Xms'$megs'M -XX:+AlwaysPreTouch -XX:+DisableExplicitGC -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=50 -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:InitiatingHeapOccupancyPercent=10 -XX:G1MixedGCLiveThresholdPercent=50 -XX:+AggressiveOpts -jar spigot.jar'
+		tmux new-window -t minecraft -n $2 -c 'servers/'$2 'java -Xmx'$megs'M -Xms'$megs'M -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=35 -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Dusing.aikars.flags=mcflags.emc.gs -jar paper.jar $3'
+    
 		echo $2' started with '$megs' megs.'
 
 		exit
