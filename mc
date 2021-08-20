@@ -242,11 +242,11 @@ if [ $1 = 'start' ]; then
 
 				if [ $server = 'bungee' ]; then
 
-					tmux new-window -t minecraft -n "$server" -c "servers/$server" 'java -Xmx'$megs'M -Xms'$megs'M -jar waterfall.jar'
+					tmux new-window -a -t minecraft -n "$server" -c "servers/$server" 'java -Xmx'$megs'M -Xms'$megs'M -jar waterfall.jar'
 
 					else
 
-			        	tmux new-window -t minecraft -n "$server" -c "servers/$server" 'java -Xmx'$megs'M -Xms'$megs'M -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=35 -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Dusing.aikars.flags=mcflags.emc.gs -jar paper.jar $3'
+			        	tmux new-window -a -t minecraft -n "$server" -c "servers/$server" 'java -Xmx'$megs'M -Xms'$megs'M -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=35 -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Dusing.aikars.flags=mcflags.emc.gs -jar paper.jar $3'
 
 	       		fi
 
@@ -274,7 +274,7 @@ if [ $1 = 'start' ]; then
 		megs=$(awk '/'$2'/ {print $2}' config/serverlist);
 
 		# start tmux window
-		tmux new-window -t minecraft -n $2 -c 'servers/'$2 'java -Xmx'$megs'M -Xms'$megs'M -jar waterfall.jar'
+		tmux new-window -a -t minecraft -n $2 -c 'servers/'$2 'java -Xmx'$megs'M -Xms'$megs'M -jar waterfall.jar'
 		echo $2' started with '$megs' megs.'
 		exit
 	fi
@@ -292,7 +292,7 @@ if [ $1 = 'start' ]; then
 		megs=$(awk '/'$2'/ {print $2}' config/serverlist);
 
 		# start tmux window
-		tmux new-window -t minecraft -n $2 -c 'servers/'$2 'java -Xmx'$megs'M -Xms'$megs'M -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=35 -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Dusing.aikars.flags=mcflags.emc.gs -jar paper.jar $3'
+		tmux new-window -a -t minecraft -n $2 -c 'servers/'$2 'java -Xmx'$megs'M -Xms'$megs'M -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=35 -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Dusing.aikars.flags=mcflags.emc.gs -jar paper.jar $3'
     
 		echo $2' started with '$megs' megs.'
 
