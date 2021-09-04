@@ -203,19 +203,17 @@ if [ $1 = 'stop' ]; then
 
 	fi
 
-	if [ $2 = 'bungee' ]; then
+	if [ $2 = 'bungee' ] || [ $2 = 'velocity' ]; then
 
-		tmux send -t minecraft:bungee 'e'
-		tmux send -t minecraft:bungee 'nd' ENTER
-		echo 'Bungee stopped.'
-
+		tmux send -t minecraft:$2 'e'
+		tmux send -t minecraft:$2 'nd' ENTER
+		echo 'proxy stopped.'
+		exit
 	fi
 
-	if [ $2 != 'bungee' ]; then
+	tmux send -t minecraft:$2 'stop' ENTER
+	echo $2' stopped.'
 
-		tmux send -t minecraft:$2 'stop' ENTER
-		echo $2' stopped.'
-	fi
 fi
 
 if [ $1 = 'start' ]; then
@@ -242,23 +240,23 @@ if [ $1 = 'start' ]; then
 
 				if [ $server = 'bungee' ]; then
 
-					tmux new-window -a -t minecraft -n "$server" -c "servers/$server" 'java -Xmx'$megs'M -Xms'$megs'M -jar waterfall.jar'
+					tmux new-window -a -t minecraft -n "$server" -c "servers/$server" 'java -Xmx'$megs'M -Xms512M -jar waterfall.jar'
 
 					else
 
-			        	tmux new-window -a -t minecraft -n "$server" -c "servers/$server" 'java -Xmx'$megs'M -Xms'$megs'M -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=35 -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Dusing.aikars.flags=mcflags.emc.gs -jar paper.jar $3'
+					tmux new-window -a -t minecraft -n "$server" -c "servers/$server" 'java -Xmx'$megs'M -Xms2056M -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=https://mcflags.emc.gs -Daikars.new.flags=true -jar paper.jar nogui $3'
 
-	       		fi
+				fi
 
-	       		(( i++ ))
+				(( i++ ))
 
 			done < config/serverlist
 
 			tmux select-window -t minecraft:1
 			echo 'All servers started.'
 			exit
-                fi
-                exit
+		fi
+		exit
 	fi
 
 	if [ $2 = 'bungee' ]; then
@@ -271,33 +269,50 @@ if [ $1 = 'start' ]; then
 		fi
 
 		# match serverlist to grab memory settings
-		megs=$(awk '/'$2'/ {print $2}' config/serverlist);
+		megs=$(awk '/'$2' / {print $2}' config/serverlist);
 
 		# start tmux window
-		tmux new-window -a -t minecraft -n $2 -c 'servers/'$2 'java -Xmx'$megs'M -Xms'$megs'M -jar waterfall.jar'
+		tmux new-window -a -t minecraft -n $2 -c 'servers/'$2 'java -Xms512M -Xmx'$megs'M -jar waterfall.jar'
 		echo $2' started with '$megs' megs.'
 		exit
 	fi
 
-	if [ $2 != 'bungee' ]; then
+	if [ $2 = 'velocity' ]; then
 
-        # check if session exists
+		# check if session exists
         if ! (tmux has-session -t 'minecraft' 2> /dev/null); then
 
-        	tmux new-session -d -s minecraft
+			tmux new-session -d -s minecraft
 
-        fi
+		fi
 
 		# match serverlist to grab memory settings
-		megs=$(awk '/'$2'/ {print $2}' config/serverlist);
+		megs=$(awk '/'$2' / {print $2}' config/serverlist);
 
 		# start tmux window
-		tmux new-window -a -t minecraft -n $2 -c 'servers/'$2 'java -Xmx'$megs'M -Xms'$megs'M -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=35 -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Dusing.aikars.flags=mcflags.emc.gs -jar paper.jar $3'
-    
-		echo $2' started with '$megs' megs.'
 
+		tmux new-window -a -t minecraft -n $2 -c 'servers/'$2 'java -Xms512M -Xmx'$megs'M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:MaxInlineLevel=15 -jar velocity*.jar'
+		echo $2' started with '$megs' megs.'
 		exit
 	fi
+
+	# single server only
+
+    # check if session exists
+    if ! (tmux has-session -t 'minecraft' 2> /dev/null); then
+
+    	tmux new-session -d -s minecraftcd 
+
+    fi
+
+	# match serverlist to grab memory settings
+	megs=$(awk '/'$2' / {print $2}' config/serverlist);
+
+	# start tmux window
+	tmux new-window -a -t minecraft -n $2 -c 'servers/'$2 'java -Xms2056M -Xmx'$megs'M -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=https://mcflags.emc.gs -Daikars.new.flags=true -jar paper.jar nogui $3'
+
+	echo $2' started with '$megs' megs.'
+
 fi
 
 if [ $1 = 'update' ]; then
