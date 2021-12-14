@@ -171,7 +171,8 @@ if [ $1 = 'shutdown' ]; then
 
 			response=${response,,}    # tolower
 
-			if [[ $response =~ ^(yes|y)$ ]]; then
+#			if [[ $response =~ ^\(yes|y\)$ ]]; then
+			if [[ $response = "yes" || $response = "y" ]]; then
 
 				tmux kill-session -t minecraft
 				echo 'Shutting down session.'
