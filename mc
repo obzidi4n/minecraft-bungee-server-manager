@@ -241,7 +241,7 @@ if [ $1 = 'start' ]; then
 
 				if [ $server = 'bungee' ]; then
 
-					tmux new-window -a -t minecraft -n "$server" -c "servers/$server" 'java -Xmx'$megs'M -Xms512M -jar waterfall.jar'
+					tmux new-window -a -t minecraft -n "$server" -c "servers/$server" 'java -Xmx'$megs'M -Xms512M -jar BungeeCord.jar'
 
 					else
 
@@ -273,7 +273,7 @@ if [ $1 = 'start' ]; then
 		megs=$(awk '/'$2' / {print $2}' config/serverlist);
 
 		# start tmux window
-		tmux new-window -a -t minecraft -n $2 -c 'servers/'$2 'java -Xms512M -Xmx'$megs'M -jar waterfall.jar'
+		tmux new-window -a -t minecraft -n $2 -c 'servers/'$2 'java -Xms512M -Xmx'$megs'M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:MaxInlineLevel=15 -jar BungeeCord*.jar'
 		echo $2' started with '$megs' megs.'
 		exit
 	fi
@@ -297,12 +297,31 @@ if [ $1 = 'start' ]; then
 		exit
 	fi
 
+	if [ $2 = 'waterfall' ]; then
+
+		# check if session exists
+        if ! (tmux has-session -t 'minecraft' 2> /dev/null); then
+
+			tmux new-session -d -s minecraft
+
+		fi
+
+		# match serverlist to grab memory settings
+		megs=$(awk '/'$2' / {print $2}' config/serverlist);
+
+		# start tmux window
+
+		tmux new-window -a -t minecraft -n $2 -c 'servers/'$2 'java -Xms512M -Xmx'$megs'M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:MaxInlineLevel=15 -jar waterfall*.jar'
+		echo $2' started with '$megs' megs.'
+		exit
+	fi
+
 	# single server only
 
     # check if session exists
     if ! (tmux has-session -t 'minecraft' 2> /dev/null); then
 
-    	tmux new-session -d -s minecraftcd 
+    	tmux new-session -d -s minecraft
 
     fi
 
@@ -310,7 +329,7 @@ if [ $1 = 'start' ]; then
 	megs=$(awk '/'$2' / {print $2}' config/serverlist);
 
 	# start tmux window
-	tmux new-window -a -t minecraft -n $2 -c 'servers/'$2 'java -Xms2056M -Xmx'$megs'M -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=https://mcflags.emc.gs -Daikars.new.flags=true -jar paper.jar nogui $3'
+	tmux new-window -a -t minecraft -n $2 -c 'servers/'$2 'java -Xms2056M -Xmx'$megs'M -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=https://mcflags.emc.gs -Daikars.new.flags=true -DPaper.parseYamlCommentsByDefault=false -jar paper.jar nogui $3'
 
 	echo $2' started with '$megs' megs.'
 
